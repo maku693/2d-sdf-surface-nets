@@ -17,13 +17,12 @@ export class SDFData {
     this.data =
       data || new Float32Array(this.width * this.height).fill(Infinity);
   }
-}
-
-export function render(sdfdata, f) {
-  for (let y = 0; y < sdfdata.height; y++) {
-    for (let x = 0; x < sdfdata.width; x++) {
-      const i = x + sdfdata.width * y;
-      sdfdata.data[i] = f(x, y);
+  drawDistanceFunction(f) {
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        const i = x + this.width * y;
+        this.data[i] = Math.min(this.data[i], f(x, y));
+      }
     }
   }
 }
