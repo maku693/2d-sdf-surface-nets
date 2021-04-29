@@ -28,7 +28,8 @@ function draw() {
 
 draw();
 
-canvas.addEventListener("click", (e) => {
+canvas.addEventListener("mousemove", (e) => {
+  if (e.buttons !== 1) return;
   sdfdata.drawDistanceFunction(circle(e.offsetX, e.offsetY, 16));
   draw();
 });
