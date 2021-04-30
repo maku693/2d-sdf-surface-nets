@@ -1,7 +1,7 @@
 import { circle, merge, SDFData } from "./sdf.js";
 
 const sdfdata = new SDFData(32, 32);
-const scene = merge(circle(16, 16, 8), circle(24, 24, 4));
+const scene = merge(circle(15, 15, 8), circle(23, 23, 4));
 sdfdata.drawDistanceFunction(scene);
 
 {
@@ -59,6 +59,7 @@ canvas.height = sdfdata.height * pixelsPerGrid;
 const ctx = canvas.getContext("2d");
 
 const corners = new Float32Array(4);
+const gridToVertex = {};
 for (let y = 0; y < sdfdata.height - 1; y++) {
   for (let x = 0; x < sdfdata.width - 1; x++) {
     let cornerMask = 0;
@@ -72,14 +73,60 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
     }
 
     const edges = cornersToEdges[cornerMask];
-    if (!edges) {
-      ctx.fillStyle = "lightgray";
-      ctx.fillRect(x * pixelsPerGrid + 8 - 4, y * pixelsPerGrid + 8 - 4, 8, 8);
-      continue;
+
+    let edgeCount = 0;
+    let dx = 0;
+    let dy = 0;
+    for (let j = 0; j < 4; j++) {
+      if (!(edges & (1 << j))) continue;
+      edgeCount++;
+
+      const e0 = squareEdges[j][0];
+      const e1 = squareEdges[j][1];
+
+      const e0x = e0 % 2;
+      const e0y = parseInt(e0 / 2);
+      const d0 = sdfdata.data[x + e0x + (y + e0y) * sdfdata.width];
+
+      const e1x = e1 % 2;
+      const e1y = parseInt(e1 / 2);
+      const d1 = sdfdata.data[x + e1x + (y + e1y) * sdfdata.width];
+
+      dx += e0x + e1x;
+      dy += e0y + e1y;
+      console.log(
+        [e0x, e1x, e0x + e1x, d0, d1, (e0x * d0 + e1x * d1) / (d0 + d1)],
+        [e0y, e1y, e0y + e1y, d0, d1, (e0y * d0 + e1y * d1) / (d0 + d1)]
+      );
+      //   dx += (e0x * d0 + e1x * d1) / (d0 + d1);
+      //   dy += (e0y * d0 + e1y * d1) / (d0 + d1);
     }
 
-    ctx.fillStyle = "black";
-    ctx.fillRect(x * pixelsPerGrid + 8 - 4, y * pixelsPerGrid + 8 - 4, 8, 8);
+    if (edgeCount === 0) continue;
+
+    dx /= edgeCount;
+    dy /= edgeCount;
+
+    const vx = (x + dx) * pixelsPerGrid;
+    const vy = (y + dy) * pixelsPerGrid;
+
+    gridToVertex[x + y * sdfdata.width] = [vx, vy];
+
+    ctx.strokeStyle = "blue";
+    if (y !== 0 && edges & 0b0001) {
+      const [vx_, vy_] = gridToVertex[x + (y - 1) * sdfdata.width];
+      ctx.beginPath();
+      ctx.moveTo(vx_, vy_);
+      ctx.lineTo(vx, vy);
+      ctx.stroke();
+    }
+    if (x !== 0 && edges & 0b0010) {
+      const [vx_, vy_] = gridToVertex[x - 1 + y * sdfdata.width];
+      ctx.beginPath();
+      ctx.moveTo(vx_, vy_);
+      ctx.lineTo(vx, vy);
+      ctx.stroke();
+    }
   }
 }
 
