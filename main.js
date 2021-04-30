@@ -98,17 +98,12 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
         [e0x, e1x, e0x + e1x, d0, d1, (e0x * d0 + e1x * d1) / (d0 + d1)],
         [e0y, e1y, e0y + e1y, d0, d1, (e0y * d0 + e1y * d1) / (d0 + d1)]
       );
-      //   dx += (e0x * d0 + e1x * d1) / (d0 + d1);
-      //   dy += (e0y * d0 + e1y * d1) / (d0 + d1);
     }
 
     if (edgeCount === 0) continue;
 
-    dx /= edgeCount;
-    dy /= edgeCount;
-
-    const vx = (x + dx) * pixelsPerGrid;
-    const vy = (y + dy) * pixelsPerGrid;
+    const vx = x + dx / edgeCount;
+    const vy = y + dy / edgeCount;
 
     gridToVertex[x + y * sdfdata.width] = [vx, vy];
 
@@ -116,15 +111,15 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
     if (y !== 0 && edges & 0b0001) {
       const [vx_, vy_] = gridToVertex[x + (y - 1) * sdfdata.width];
       ctx.beginPath();
-      ctx.moveTo(vx_, vy_);
-      ctx.lineTo(vx, vy);
+      ctx.moveTo(vx * pixelsPerGrid, vy * pixelsPerGrid);
+      ctx.lineTo(vx_ * pixelsPerGrid, vy_ * pixelsPerGrid);
       ctx.stroke();
     }
     if (x !== 0 && edges & 0b0010) {
       const [vx_, vy_] = gridToVertex[x - 1 + y * sdfdata.width];
       ctx.beginPath();
-      ctx.moveTo(vx_, vy_);
-      ctx.lineTo(vx, vy);
+      ctx.moveTo(vx * pixelsPerGrid, vy * pixelsPerGrid);
+      ctx.lineTo(vx_ * pixelsPerGrid, vy_ * pixelsPerGrid);
       ctx.stroke();
     }
   }
