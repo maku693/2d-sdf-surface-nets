@@ -1,7 +1,7 @@
 import { circle, merge, SDFData } from "./sdf.js";
 
-const sdfdata = new SDFData(64, 64);
-const scene = merge(circle(32, 32, 16), circle(48, 48, 8));
+const sdfdata = new SDFData(32, 32);
+const scene = merge(circle(16, 16, 8), circle(24, 24, 4));
 sdfdata.drawDistanceFunction(scene);
 
 {
@@ -25,7 +25,12 @@ sdfdata.drawDistanceFunction(scene);
   ctx.putImageData(imagedata, 0, 0);
 }
 
-const squareEdges = [0, 1, 0, 2, 1, 3, 2, 3];
+const squareEdges = [
+  [0, 1],
+  [0, 2],
+  [1, 3],
+  [2, 3],
+];
 
 /**
  * cornersToEdges is edges indexed by corners.
@@ -38,15 +43,15 @@ const cornersToEdges = new Uint8Array(1 << 4);
   for (let i = 0; i < cornersToEdges.length; i++) {
     let edges = 0;
     for (let j = 0; j < 4; j++) {
-      const a = !!(i & (1 << squareEdges[j * 2]));
-      const b = !!(i & (1 << squareEdges[j * 2 + 1]));
+      const a = !!(i & (1 << squareEdges[j][0]));
+      const b = !!(i & (1 << squareEdges[j][1]));
       edges |= a === b ? 0 : 1 << j;
     }
     cornersToEdges[i] = edges;
   }
 }
 
-const pixelsPerGrid = 4;
+const pixelsPerGrid = 8;
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 canvas.width = sdfdata.width * pixelsPerGrid;
@@ -67,9 +72,14 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
     }
 
     const edges = cornersToEdges[cornerMask];
-    if (!edges) continue;
+    if (!edges) {
+      ctx.fillStyle = "lightgray";
+      ctx.fillRect(x * pixelsPerGrid + 8 - 4, y * pixelsPerGrid + 8 - 4, 8, 8);
+      continue;
+    }
 
-    ctx.fillRect(x * pixelsPerGrid - 1, y * pixelsPerGrid - 1, 2, 2);
+    ctx.fillStyle = "black";
+    ctx.fillRect(x * pixelsPerGrid + 8 - 4, y * pixelsPerGrid + 8 - 4, 8, 8);
   }
 }
 
