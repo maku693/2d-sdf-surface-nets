@@ -66,8 +66,21 @@ for (let y = 0; y < sdfdata.height; y++) {
   }
 }
 
-ctx.lineWidth = 2;
 ctx.strokeStyle = "white";
+ctx.lineWidth = 2;
+
+ctx.setLineDash([2, 2]);
+ctx.beginPath();
+ctx.arc(
+  4 * pixelsPerGrid,
+  4 * pixelsPerGrid,
+  2 * pixelsPerGrid,
+  0,
+  Math.PI * 2
+);
+ctx.stroke();
+
+ctx.setLineDash([]);
 
 const corners = new Float32Array(4);
 const gridToVertex = {};
@@ -130,9 +143,3 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
     }
   }
 }
-
-canvas.addEventListener("mousemove", (e) => {
-  //   if (e.buttons !== 1) return;
-  //   sdfdata.drawDistanceFunction(circle(e.offsetX, e.offsetY, 4));
-  //   draw();
-});
