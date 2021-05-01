@@ -1,7 +1,7 @@
 import { circle, merge, SDFData } from "./sdf.js";
 
-const sdfdata = new SDFData(32, 32);
-const scene = merge(circle(15.5, 15.5, 8));
+const sdfdata = new SDFData(8, 8);
+const scene = merge(circle(4, 4, 2));
 sdfdata.drawDistanceFunction(scene);
 
 const squareEdges = [
@@ -58,6 +58,8 @@ for (let y = 0; y < sdfdata.height; y++) {
   }
 }
 
+ctx.strokeStyle = "white";
+
 const corners = new Float32Array(4);
 const gridToVertex = {};
 for (let y = 0; y < sdfdata.height - 1; y++) {
@@ -109,7 +111,6 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
 
     gridToVertex[x + y * sdfdata.width] = [vx, vy];
 
-    ctx.strokeStyle = "white";
     if (y !== 0 && edges & 0b0001) {
       const [vx_, vy_] = gridToVertex[x + (y - 1) * sdfdata.width];
       ctx.beginPath();
