@@ -1,29 +1,8 @@
 import { circle, merge, SDFData } from "./sdf.js";
 
 const sdfdata = new SDFData(32, 32);
-const scene = merge(circle(15, 15, 8), circle(23, 23, 4));
+const scene = merge(circle(15.5, 15.5, 8));
 sdfdata.drawDistanceFunction(scene);
-
-{
-  // Debug view
-  const canvas = document.createElement("canvas");
-  document.body.appendChild(canvas);
-  canvas.width = sdfdata.width;
-  canvas.height = sdfdata.height;
-  const ctx = canvas.getContext("2d");
-  const imagedata = ctx.getImageData(0, 0, sdfdata.width, sdfdata.height);
-  for (let y = 0; y < sdfdata.height; y++) {
-    for (let x = 0; x < sdfdata.width; x++) {
-      const i = x + sdfdata.width * y;
-      const d = sdfdata.data[i];
-      imagedata.data[i * 4 + 0] = d > 0 ? 0xff * d : 0; // R
-      imagedata.data[i * 4 + 1] = d < 0 ? 0xff * -d : 0; // G
-      imagedata.data[i * 4 + 2] = 0; // B
-      imagedata.data[i * 4 + 3] = 0xff; // A
-    }
-  }
-  ctx.putImageData(imagedata, 0, 0);
-}
 
 const squareEdges = [
   [0, 1],
@@ -51,12 +30,33 @@ const cornersToEdges = new Uint8Array(1 << 4);
   }
 }
 
-const pixelsPerGrid = 8;
+const pixelsPerGrid = 10;
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 canvas.width = sdfdata.width * pixelsPerGrid;
 canvas.height = sdfdata.height * pixelsPerGrid;
 const ctx = canvas.getContext("2d");
+
+for (let y = 0; y < sdfdata.height; y++) {
+  for (let x = 0; x < sdfdata.width; x++) {
+    const i = x + sdfdata.width * y;
+    const d = sdfdata.data[i];
+    const r = d > 0 ? 0xff * d : 0;
+    const g = d < 0 ? 0xff * -d : 0;
+    console.log(r, g);
+    ctx.fillStyle = `rgba(${r}, ${g}, 0, 1)`;
+    ctx.strokeStyle = "black";
+    ctx.beginPath();
+    ctx.rect(
+      x * pixelsPerGrid,
+      y * pixelsPerGrid,
+      pixelsPerGrid,
+      pixelsPerGrid
+    );
+    ctx.fill();
+    ctx.stroke();
+  }
+}
 
 const corners = new Float32Array(4);
 const gridToVertex = {};
@@ -94,20 +94,22 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
 
       dx += e0x + e1x;
       dy += e0y + e1y;
-      console.log(
-        [e0x, e1x, e0x + e1x, d0, d1, (e0x * d0 + e1x * d1) / (d0 + d1)],
-        [e0y, e1y, e0y + e1y, d0, d1, (e0y * d0 + e1y * d1) / (d0 + d1)]
-      );
+      //   console.log(d0, d1);
+      //   console.log(
+      //     [e0x, e1x, e0x + e1x, d0, d1, (e0x * d0 + e1x * d1) / (d0 + d1)],
+      //     [e0y, e1y, e0y + e1y, d0, d1, (e0y * d0 + e1y * d1) / (d0 + d1)]
+      //   );
     }
 
     if (edgeCount === 0) continue;
 
     const vx = x + dx / edgeCount;
     const vy = y + dy / edgeCount;
+    // console.log(dx, dy, edgeCount);
 
     gridToVertex[x + y * sdfdata.width] = [vx, vy];
 
-    ctx.strokeStyle = "blue";
+    ctx.strokeStyle = "white";
     if (y !== 0 && edges & 0b0001) {
       const [vx_, vy_] = gridToVertex[x + (y - 1) * sdfdata.width];
       ctx.beginPath();
