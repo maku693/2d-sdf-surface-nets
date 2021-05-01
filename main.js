@@ -30,7 +30,7 @@ const cornersToEdges = new Uint8Array(1 << 4);
   }
 }
 
-const pixelsPerGrid = 10;
+const pixelsPerGrid = 40;
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 canvas.width = sdfdata.width * pixelsPerGrid;
@@ -55,6 +55,14 @@ for (let y = 0; y < sdfdata.height; y++) {
     );
     ctx.fill();
     ctx.stroke();
+    ctx.fillStyle = "white";
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "center";
+    ctx.fillText(
+      `${d.toString().slice(0, 5)}`,
+      x * pixelsPerGrid + pixelsPerGrid / 2,
+      y * pixelsPerGrid + pixelsPerGrid / 2
+    );
   }
 }
 
