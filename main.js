@@ -1,4 +1,4 @@
-import { circle, merge, SDFData } from "./sdf.js";
+import { circle, SDFData } from "./sdf.js";
 
 const squareEdges = [
   [0, 1],
@@ -27,7 +27,7 @@ const cornersToEdges = new Uint8Array(1 << 4);
 }
 
 const sdfdata = new SDFData(8, 8);
-const scene = merge(circle(4, 4, 2));
+const scene = circle(4, 4, 2);
 sdfdata.drawDistanceFunction(scene);
 
 const pixelsPerGrid = 40;
@@ -66,6 +66,7 @@ for (let y = 0; y < sdfdata.height; y++) {
   }
 }
 
+ctx.lineWidth = 2;
 ctx.strokeStyle = "white";
 
 const corners = new Float32Array(4);
@@ -104,18 +105,12 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
 
       dx += e0x + e1x;
       dy += e0y + e1y;
-      //   console.log(d0, d1);
-      //   console.log(
-      //     [e0x, e1x, e0x + e1x, d0, d1, (e0x * d0 + e1x * d1) / (d0 + d1)],
-      //     [e0y, e1y, e0y + e1y, d0, d1, (e0y * d0 + e1y * d1) / (d0 + d1)]
-      //   );
     }
 
     if (edgeCount === 0) continue;
 
     const vx = x + dx / edgeCount;
     const vy = y + dy / edgeCount;
-    // console.log(dx, dy, edgeCount);
 
     gridToVertex[x + y * sdfdata.width] = [vx, vy];
 
