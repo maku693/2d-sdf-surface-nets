@@ -1,9 +1,5 @@
 import { circle, merge, SDFData } from "./sdf.js";
 
-const sdfdata = new SDFData(8, 8);
-const scene = merge(circle(4, 4, 2));
-sdfdata.drawDistanceFunction(scene);
-
 const squareEdges = [
   [0, 1],
   [0, 2],
@@ -29,6 +25,10 @@ const cornersToEdges = new Uint8Array(1 << 4);
     cornersToEdges[i] = edges;
   }
 }
+
+const sdfdata = new SDFData(8, 8);
+const scene = merge(circle(4, 4, 2));
+sdfdata.drawDistanceFunction(scene);
 
 const pixelsPerGrid = 40;
 const canvas = document.createElement("canvas");
