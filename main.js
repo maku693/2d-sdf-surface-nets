@@ -88,7 +88,7 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
     let dx = 0;
     let dy = 0;
     for (let j = 0; j < 4; j++) {
-      if (!(edges & (1 << j))) continue;
+      //   if (!(edges & (1 << j))) continue;
       edgeCount++;
 
       const e0 = squareEdges[j][0];
