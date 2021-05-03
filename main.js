@@ -118,8 +118,8 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
     const edges = cornersToEdges[cornerMask];
 
     let edgeCount = 0;
-    let dx = 0;
-    let dy = 0;
+    let dx = 0.5;
+    let dy = 0.5;
     for (let j = 0; j < 4; j++) {
       if (!(edges & (1 << j))) continue;
       edgeCount++;
@@ -144,8 +144,8 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
 
     if (edgeCount === 0) continue;
 
-    const vx = x + dx / edgeCount + 0.5;
-    const vy = y + dy / edgeCount + 0.5;
+    const vx = x + dx / edgeCount;
+    const vy = y + dy / edgeCount;
 
     gridToVertex[x + y * sdfdata.width] = [vx, vy];
 
