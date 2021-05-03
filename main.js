@@ -95,7 +95,6 @@ ctx.lineWidth = 2;
   ctx.setLineDash([]);
 }
 
-const corners = new Float32Array(4);
 const gridToVertex = {};
 for (let y = 0; y < sdfdata.height - 1; y++) {
   for (let x = 0; x < sdfdata.width - 1; x++) {
@@ -104,7 +103,6 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
       for (let u = 0; u < 2; u++) {
         const d = sdfdata.data[x + u + (y + v) * sdfdata.width];
         const i = u + v * 2;
-        corners[i] = d;
         cornerMask |= (0 < d) << i;
       }
     }
