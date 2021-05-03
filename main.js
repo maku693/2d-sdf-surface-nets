@@ -1,4 +1,4 @@
-import { circle, SDFData } from "./sdf.js";
+import { circle, merge, SDFData } from "./sdf.js";
 
 const squareEdges = [
   [0, 1],
@@ -26,11 +26,11 @@ const cornersToEdges = new Uint8Array(1 << 4);
   }
 }
 
-const sdfdata = new SDFData(8, 8);
-const scene = circle(4, 4, 2);
+const sdfdata = new SDFData(16, 16);
+const scene = merge(circle(8, 8, 4), circle(12, 12, 2));
 sdfdata.drawDistanceFunction(scene);
 
-const pixelsPerGrid = 40;
+const pixelsPerGrid = 20;
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 canvas.width = sdfdata.width * pixelsPerGrid;
@@ -43,7 +43,6 @@ for (let y = 0; y < sdfdata.height; y++) {
     const d = sdfdata.data[i];
     const r = d > 0 ? 0xff * d : 0;
     const g = d < 0 ? 0xff * -d : 0;
-    console.log(r, g);
     ctx.fillStyle = `rgba(${r}, ${g}, 0, 1)`;
     ctx.strokeStyle = "black";
     ctx.beginPath();
@@ -58,8 +57,9 @@ for (let y = 0; y < sdfdata.height; y++) {
     ctx.fillStyle = "white";
     ctx.textBaseline = "middle";
     ctx.textAlign = "center";
+    ctx.font = "8px monospace";
     ctx.fillText(
-      `${d.toString().slice(0, 5)}`,
+      `${d.toFixed(1)}`,
       x * pixelsPerGrid + pixelsPerGrid / 2,
       y * pixelsPerGrid + pixelsPerGrid / 2
     );
@@ -69,18 +69,31 @@ for (let y = 0; y < sdfdata.height; y++) {
 ctx.strokeStyle = "white";
 ctx.lineWidth = 2;
 
-ctx.setLineDash([2, 2]);
-ctx.beginPath();
-ctx.arc(
-  4 * pixelsPerGrid,
-  4 * pixelsPerGrid,
-  2 * pixelsPerGrid,
-  0,
-  Math.PI * 2
-);
-ctx.stroke();
+{
+  ctx.setLineDash([2, 2]);
 
-ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.arc(
+    8 * pixelsPerGrid,
+    8 * pixelsPerGrid,
+    4 * pixelsPerGrid,
+    0,
+    Math.PI * 2
+  );
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(
+    12 * pixelsPerGrid,
+    12 * pixelsPerGrid,
+    2 * pixelsPerGrid,
+    0,
+    Math.PI * 2
+  );
+  ctx.stroke();
+
+  ctx.setLineDash([]);
+}
 
 const corners = new Float32Array(4);
 const gridToVertex = {};
