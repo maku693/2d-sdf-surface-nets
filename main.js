@@ -117,14 +117,16 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
       const d1 = sdfdata.data[x + e1x + (y + e1y) * sdfdata.width];
 
       // y = y1 + (y2 - y1) / (x2 - x1) * (x - x1)
-      dx += e0x + ((e1x - e0x) / (d1 - d0)) * (0 - d0) + 0.5; // (e0x + e1x) / 2;
-      dy += e0y + ((e1y - e0y) / (d1 - d0)) * (0 - d0) + 0.5; // (e0y + e1y) / 2;
+      dx += e0x + ((e1x - e0x) / (d1 - d0)) * (0 - d0);
+      dy += e0y + ((e1y - e0y) / (d1 - d0)) * (0 - d0);
+      // dx += (e0x + e1x) / 2;
+      // dy += (e0y + e1y) / 2;
     }
 
     if (edgeCount === 0) continue;
 
-    const vx = x + dx / edgeCount;
-    const vy = y + dy / edgeCount;
+    const vx = x + dx / edgeCount + 0.5;
+    const vy = y + dy / edgeCount + 0.5;
 
     gridToVertex[x + y * sdfdata.width] = [vx, vy];
 
