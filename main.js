@@ -102,7 +102,7 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
     let dx = 0;
     let dy = 0;
     for (let j = 0; j < 4; j++) {
-      //   if (!(edges & (1 << j))) continue;
+      if (!(edges & (1 << j))) continue;
       edgeCount++;
 
       const e0 = squareEdges[j][0];
@@ -116,8 +116,9 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
       const e1y = parseInt(e1 / 2);
       const d1 = sdfdata.data[x + e1x + (y + e1y) * sdfdata.width];
 
-      dx += e0x + e1x;
-      dy += e0y + e1y;
+      // y = y1 + (y2 - y1) / (x2 - x1) * (x - x1)
+      dx += e0x + ((e1x - e0x) / (d1 - d0)) * (0 - d0) + 0.5; // (e0x + e1x) / 2;
+      dy += e0y + ((e1y - e0y) / (d1 - d0)) * (0 - d0) + 0.5; // (e0y + e1y) / 2;
     }
 
     if (edgeCount === 0) continue;
