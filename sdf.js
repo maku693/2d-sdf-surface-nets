@@ -21,7 +21,7 @@ export class SDFData {
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         const i = x + this.width * y;
-        // Shift the sampling point to center of grid
+        // Shift the sampling point to center of the grid
         const x_ = x + 0.5,
           y_ = y + 0.5;
         this.data[i] = Math.min(this.data[i], f(x_, y_));

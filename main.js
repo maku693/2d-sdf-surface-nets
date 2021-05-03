@@ -144,6 +144,7 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
 
     if (edgeCount === 0) continue;
 
+    // Shift vertex to center of the grid
     const vx = x + 0.5 + dx / edgeCount;
     const vy = y + 0.5 + dy / edgeCount;
 
