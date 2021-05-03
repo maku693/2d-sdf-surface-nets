@@ -33,9 +33,12 @@ sdfdata.drawDistanceFunction(scene);
 const pixelsPerGrid = 20;
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
-canvas.width = sdfdata.width * pixelsPerGrid;
-canvas.height = sdfdata.height * pixelsPerGrid;
+canvas.style.width = `${sdfdata.width * pixelsPerGrid}px`;
+canvas.style.height = `${sdfdata.height * pixelsPerGrid}px`;
+canvas.width = sdfdata.width * pixelsPerGrid * window.devicePixelRatio;
+canvas.height = sdfdata.height * pixelsPerGrid * window.devicePixelRatio;
 const ctx = canvas.getContext("2d");
+ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
 ctx.fillStyle = "black";
 ctx.fillRect(0, 0, canvas.width, canvas.height);
