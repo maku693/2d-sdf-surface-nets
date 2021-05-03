@@ -37,32 +37,37 @@ canvas.width = sdfdata.width * pixelsPerGrid;
 canvas.height = sdfdata.height * pixelsPerGrid;
 const ctx = canvas.getContext("2d");
 
-for (let y = 0; y < sdfdata.height; y++) {
-  for (let x = 0; x < sdfdata.width; x++) {
-    const i = x + sdfdata.width * y;
-    const d = sdfdata.data[i];
-    const r = d > 0 ? 0xff * d : 0;
-    const g = d < 0 ? 0xff * -d : 0;
-    ctx.fillStyle = `rgba(${r}, ${g}, 0, 1)`;
-    ctx.strokeStyle = "black";
-    ctx.beginPath();
-    ctx.rect(
-      x * pixelsPerGrid,
-      y * pixelsPerGrid,
-      pixelsPerGrid,
-      pixelsPerGrid
-    );
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = "white";
-    ctx.textBaseline = "middle";
-    ctx.textAlign = "center";
-    ctx.font = "8px monospace";
-    ctx.fillText(
-      `${d.toFixed(1)}`,
-      x * pixelsPerGrid + pixelsPerGrid / 2,
-      y * pixelsPerGrid + pixelsPerGrid / 2
-    );
+ctx.fillStyle = "black";
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+{
+  for (let y = 0; y < sdfdata.height; y++) {
+    for (let x = 0; x < sdfdata.width; x++) {
+      const i = x + sdfdata.width * y;
+      const d = sdfdata.data[i];
+      const r = d > 0 ? 0xff * d : 0;
+      const g = d < 0 ? 0xff * -d : 0;
+      ctx.fillStyle = `rgba(${r}, ${g}, 0, 1)`;
+      ctx.strokeStyle = "black";
+      ctx.beginPath();
+      ctx.rect(
+        x * pixelsPerGrid,
+        y * pixelsPerGrid,
+        pixelsPerGrid,
+        pixelsPerGrid
+      );
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "white";
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "center";
+      ctx.font = "8px monospace";
+      ctx.fillText(
+        `${d.toFixed(1)}`,
+        x * pixelsPerGrid + pixelsPerGrid / 2,
+        y * pixelsPerGrid + pixelsPerGrid / 2
+      );
+    }
   }
 }
 
