@@ -77,32 +77,6 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 ctx.strokeStyle = "white";
 ctx.lineWidth = 2;
 
-{
-  ctx.setLineDash([2, 2]);
-
-  ctx.beginPath();
-  ctx.arc(
-    8 * pixelsPerGrid,
-    8 * pixelsPerGrid,
-    4 * pixelsPerGrid,
-    0,
-    Math.PI * 2
-  );
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.arc(
-    12 * pixelsPerGrid,
-    12 * pixelsPerGrid,
-    2 * pixelsPerGrid,
-    0,
-    Math.PI * 2
-  );
-  ctx.stroke();
-
-  ctx.setLineDash([]);
-}
-
 const gridToVertex = {};
 for (let y = 0; y < sdfdata.height - 1; y++) {
   for (let x = 0; x < sdfdata.width - 1; x++) {
