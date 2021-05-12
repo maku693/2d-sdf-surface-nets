@@ -26,8 +26,11 @@ const cornersToEdges = new Uint8Array(1 << 4);
   }
 }
 
-const sdfdata = new SDFData(16, 16);
-const scene = merge(circle(8, 8, 4), circle(12, 12, 2));
+const sdfdata = new SDFData(16);
+const scene = merge(
+  circle(sdfdata.width / 2, sdfdata.height / 2, sdfdata.width / 4),
+  circle((sdfdata.width / 4) * 3, (sdfdata.height / 4) * 3, sdfdata.width / 8)
+);
 sdfdata.drawDistanceFunction(scene);
 
 const pixelsPerGrid = 20;
