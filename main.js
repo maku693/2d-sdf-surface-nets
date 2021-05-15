@@ -141,5 +141,16 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
       ctx.lineTo(vx_ * pixelsPerGrid, vy_ * pixelsPerGrid);
       ctx.stroke();
     }
+
+    const nx =
+      sdfdata.data[x + 1 + y * sdfdata.width] -
+      sdfdata.data[x + y * sdfdata.width];
+    const ny =
+      sdfdata.data[x + (y + 1) * sdfdata.width] -
+      sdfdata.data[x + y * sdfdata.width];
+    ctx.beginPath();
+    ctx.moveTo(vx * pixelsPerGrid, vy * pixelsPerGrid);
+    ctx.lineTo(vx * pixelsPerGrid + 20 * nx, vy * pixelsPerGrid + 20 * ny);
+    ctx.stroke();
   }
 }
