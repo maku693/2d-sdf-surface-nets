@@ -77,7 +77,6 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 }
 
-ctx.strokeStyle = "white";
 ctx.lineWidth = 2;
 
 const gridToVertex = {};
@@ -127,6 +126,7 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
 
     gridToVertex[x + y * sdfdata.width] = [vx, vy];
 
+    ctx.strokeStyle = "white";
     if (y !== 0 && edges & 0b0001) {
       const [vx_, vy_] = gridToVertex[x + (y - 1) * sdfdata.width];
       ctx.beginPath();
@@ -142,12 +142,13 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
       ctx.stroke();
     }
 
-    const nx =
-      sdfdata.data[x + 1 + y * sdfdata.width] -
-      sdfdata.data[x + y * sdfdata.width];
-    const ny =
-      sdfdata.data[x + (y + 1) * sdfdata.width] -
-      sdfdata.data[x + y * sdfdata.width];
+    const d0 = sdfdata.data[x + y * sdfdata.width];
+    const d1 = sdfdata.data[x + 1 + y * sdfdata.width];
+    const d2 = sdfdata.data[x + (y + 1) * sdfdata.width];
+    const d3 = sdfdata.data[x + 1 + (y + 1) * sdfdata.width];
+    const nx = (d1 - d0 + d3 - d2) / 2;
+    const ny = (d2 - d0 + d3 - d1) / 2;
+    ctx.strokeStyle = "cyan";
     ctx.beginPath();
     ctx.moveTo(vx * pixelsPerGrid, vy * pixelsPerGrid);
     ctx.lineTo(vx * pixelsPerGrid + 20 * nx, vy * pixelsPerGrid + 20 * ny);
