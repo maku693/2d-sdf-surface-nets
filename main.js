@@ -111,13 +111,11 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
         }
         indices[j] = x + uv[j][0] + (y + uv[j][1]) * sdfdata.width;
       }
+      const t =
+        (0 - sdfdata.data[indices[0]]) /
+        (sdfdata.data[indices[1]] - sdfdata.data[indices[0]]);
       for (let j = 0; j < 2; j++) {
-        // y = y1 + (y2 - y1) / (x2 - x1) * (x - x1)
-        d[j] +=
-          uv[0][j] +
-          ((uv[1][j] - uv[0][j]) /
-            (sdfdata.data[indices[1]] - sdfdata.data[indices[0]])) *
-            (0 - sdfdata.data[indices[0]]);
+        d[j] += lerp(uv[0][j], uv[1][j], t);
       }
     }
 
@@ -157,4 +155,22 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
     ctx.lineTo(vx * pixelsPerGrid + 20 * nx, vy * pixelsPerGrid + 20 * ny);
     ctx.stroke();
   }
+}
+
+// y = y1 + (y2 - y1) / (x2 - x1) * (x - x1)
+// y = y1 + (y2 - y1) / (x2 - x1) * (x - x1)
+// ex.)
+//// x1 = 1
+//// x = 1.5
+//// x2 = 2
+//// t = 0.5
+//// t = (1.5 - 1) / (2 - 1)
+// t = (x - x1) / (x2 - x1)
+// y = y1 + (y2 - y1) * t
+// y = y1 + t * (y2 - y1) -> (1 - t) * y1 + t * y2
+// y = y1 + t * y2 - t * y1
+// y = y1 - t * y1 + t * y2
+// y = (1 - t) * y1 + t * y2
+function lerp(x, y, a) {
+  return x * (1.0 - a) + y * a;
 }
