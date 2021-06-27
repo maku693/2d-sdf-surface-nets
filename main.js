@@ -95,35 +95,37 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
     const edges = cornersToEdges[cornerMask];
 
     let edgeCount = 0;
-    let dx = 0;
-    let dy = 0;
-    for (let j = 0; j < 4; j++) {
-      if (!(edges & (1 << j))) continue;
+    let d = [0, 0];
+    for (let i = 0; i < 4; i++) {
+      if (!(edges & (1 << i))) continue;
       edgeCount++;
 
-      const e0 = squareEdges[j][0];
-      const e1 = squareEdges[j][1];
-
-      const e0x = e0 % 2;
-      const e0y = parseInt(e0 / 2);
-      const d0 = sdfdata.data[x + e0x + (y + e0y) * sdfdata.width];
-
-      const e1x = e1 % 2;
-      const e1y = parseInt(e1 / 2);
-      const d1 = sdfdata.data[x + e1x + (y + e1y) * sdfdata.width];
-
-      // y = y1 + (y2 - y1) / (x2 - x1) * (x - x1)
-      dx += e0x + ((e1x - e0x) / (d1 - d0)) * (0 - d0);
-      dy += e0y + ((e1y - e0y) / (d1 - d0)) * (0 - d0);
-      // dx += (e0x + e1x) / 2;
-      // dy += (e0y + e1y) / 2;
+      const indices = [0, 0];
+      const uv = [
+        [0, 0],
+        [0, 0],
+      ];
+      for (let j = 0; j < 2; j++) {
+        for (let k = 0; k < 2; k++) {
+          uv[j][k] = (squareEdges[i][j] >> k) & 1;
+        }
+        indices[j] = x + uv[j][0] + (y + uv[j][1]) * sdfdata.width;
+      }
+      for (let j = 0; j < 2; j++) {
+        // y = y1 + (y2 - y1) / (x2 - x1) * (x - x1)
+        d[j] +=
+          uv[0][j] +
+          ((uv[1][j] - uv[0][j]) /
+            (sdfdata.data[indices[1]] - sdfdata.data[indices[0]])) *
+            (0 - sdfdata.data[indices[0]]);
+      }
     }
 
     if (edgeCount === 0) continue;
 
     // Shift vertex to center of the grid
-    const vx = x + 0.5 + dx / edgeCount;
-    const vy = y + 0.5 + dy / edgeCount;
+    const vx = x + 0.5 + d[0] / edgeCount;
+    const vy = y + 0.5 + d[1] / edgeCount;
 
     gridToVertex[x + y * sdfdata.width] = [vx, vy];
 
