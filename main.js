@@ -26,14 +26,15 @@ const cornersToEdges = new Uint8Array(1 << 4);
   }
 }
 
-const sdfdata = new SDFData(16);
+const sdfdata = new SDFData(32);
 const scene = merge(
-  circle(sdfdata.width / 2, sdfdata.height / 2, sdfdata.width / 4),
-  circle((sdfdata.width / 4) * 3, (sdfdata.height / 4) * 3, sdfdata.width / 8)
+  circle(sdfdata.width / 2, sdfdata.height / 2, sdfdata.width / 4)
+  // circle(sdfdata.width / 4, sdfdata.height / 2, sdfdata.width / 16),
+  // circle((sdfdata.width / 4) * 3, sdfdata.height / 2, sdfdata.width / 16)
 );
 sdfdata.drawDistanceFunction(scene);
 
-const pixelsPerGrid = 20;
+const pixelsPerGrid = 10;
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 canvas.style.width = `${sdfdata.width * pixelsPerGrid}px`;
@@ -67,7 +68,7 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "white";
       ctx.textBaseline = "middle";
       ctx.textAlign = "center";
-      ctx.font = "8px monospace";
+      ctx.font = "4px monospace";
       ctx.fillText(
         `${d.toFixed(1)}`,
         x * pixelsPerGrid + pixelsPerGrid / 2,
