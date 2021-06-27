@@ -1,6 +1,6 @@
 import { circle, merge, SDFData } from "./sdf.js";
 
-const squareEdges = [
+const edgeCorners = [
   [0, 1],
   [0, 2],
   [1, 3],
@@ -8,21 +8,21 @@ const squareEdges = [
 ];
 
 /**
- * cornersToEdges is edges indexed by corners.
+ * edgeBitFields is edges indexed by corners.
  * edges and corners are binary flag bits.
  * a bit in corners represents which corners are in the volume.
  * a bit in edges represents which edges are adjacent to the corner.
  */
-const cornersToEdges = new Uint8Array(1 << 4);
+const edgeBitFields = new Uint8Array(1 << 4);
 {
-  for (let i = 0; i < cornersToEdges.length; i++) {
+  for (let i = 0; i < edgeBitFields.length; i++) {
     let edges = 0;
     for (let j = 0; j < 4; j++) {
-      const a = !!(i & (1 << squareEdges[j][0]));
-      const b = !!(i & (1 << squareEdges[j][1]));
+      const a = !!(i & (1 << edgeCorners[j][0]));
+      const b = !!(i & (1 << edgeCorners[j][1]));
       edges |= a === b ? 0 : 1 << j;
     }
-    cornersToEdges[i] = edges;
+    edgeBitFields[i] = edges;
   }
 }
 
@@ -92,7 +92,7 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
       }
     }
 
-    const edges = cornersToEdges[cornerMask];
+    const edges = edgeBitFields[cornerMask];
 
     let edgeCount = 0;
     let d = [0, 0];
@@ -107,7 +107,7 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
       ];
       for (let j = 0; j < 2; j++) {
         for (let k = 0; k < 2; k++) {
-          uv[j][k] = (squareEdges[i][j] >> k) & 1;
+          uv[j][k] = (edgeCorners[i][j] >> k) & 1;
         }
         indices[j] = x + uv[j][0] + (y + uv[j][1]) * sdfdata.width;
       }
