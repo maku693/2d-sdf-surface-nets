@@ -164,11 +164,13 @@ function getGeometryData(data, width, height) {
   };
 }
 
+console.time("getGeometryData");
 const { vertices, normals, indices } = getGeometryData(
   sdfdata.data,
   sdfdata.width,
   sdfdata.height
 );
+console.timeEnd("getGeometryData");
 
 for (let i = 0; i < indices.length / 2; i++) {
   ctx.strokeStyle = "white";
