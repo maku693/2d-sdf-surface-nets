@@ -80,81 +80,95 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 ctx.lineWidth = 2;
 
-const vertices = [];
-const normals = [];
-const indices = [];
-const gridIndices = {};
+function getGeometryData(data, width, height) {
+  const vertices = [];
+  const normals = [];
+  const indices = [];
+  const gridIndices = {};
 
-for (let y = 0; y < sdfdata.height - 1; y++) {
-  for (let x = 0; x < sdfdata.width - 1; x++) {
-    let cornerMask = 0;
-    for (let v = 0; v < 2; v++) {
-      for (let u = 0; u < 2; u++) {
-        const d = sdfdata.data[x + u + (y + v) * sdfdata.width];
-        const i = u + v * 2;
-        cornerMask |= (0 < d) << i;
-      }
-    }
-
-    const edges = edgeBitFields[cornerMask];
-
-    let numEdges = 0;
-    let d = [0, 0];
-    for (let i = 0; i < 4; i++) {
-      if (!(edges & (1 << i))) continue;
-      numEdges++;
-
-      const dataIndices = [0, 0];
-      const uv = [
-        [0, 0],
-        [0, 0],
-      ];
-      for (let j = 0; j < 2; j++) {
-        for (let k = 0; k < 2; k++) {
-          uv[j][k] = (edgeCorners[i][j] >> k) & 1;
+  for (let y = 0; y < height - 1; y++) {
+    for (let x = 0; x < width - 1; x++) {
+      let cornerMask = 0;
+      for (let v = 0; v < 2; v++) {
+        for (let u = 0; u < 2; u++) {
+          const d = data[x + u + (y + v) * width];
+          const i = u + v * 2;
+          cornerMask |= (0 < d) << i;
         }
-        dataIndices[j] = x + uv[j][0] + (y + uv[j][1]) * sdfdata.width;
       }
-      const t =
-        (0 - sdfdata.data[dataIndices[0]]) /
-        (sdfdata.data[dataIndices[1]] - sdfdata.data[dataIndices[0]]);
-      for (let j = 0; j < 2; j++) {
-        d[j] += lerp(uv[0][j], uv[1][j], t);
+
+      const edges = edgeBitFields[cornerMask];
+
+      let numEdges = 0;
+      let d = [0, 0];
+      for (let i = 0; i < 4; i++) {
+        if (!(edges & (1 << i))) continue;
+        numEdges++;
+
+        const dataIndices = [0, 0];
+        const uv = [
+          [0, 0],
+          [0, 0],
+        ];
+        for (let j = 0; j < 2; j++) {
+          for (let k = 0; k < 2; k++) {
+            uv[j][k] = (edgeCorners[i][j] >> k) & 1;
+          }
+          dataIndices[j] = x + uv[j][0] + (y + uv[j][1]) * width;
+        }
+        const t =
+          (0 - data[dataIndices[0]]) /
+          (data[dataIndices[1]] - data[dataIndices[0]]);
+        for (let j = 0; j < 2; j++) {
+          d[j] += lerp(uv[0][j], uv[1][j], t);
+        }
       }
-    }
 
-    if (numEdges === 0) continue;
+      if (numEdges === 0) continue;
 
-    gridIndices[x + y * sdfdata.width] = vertices.length / 2;
+      gridIndices[x + y * width] = vertices.length / 2;
 
-    // Shift vertex to center of the grid
-    vertices.push(x + 0.5 + d[0] / numEdges, y + 0.5 + d[1] / numEdges);
+      // Shift vertex to center of the grid
+      vertices.push(x + 0.5 + d[0] / numEdges, y + 0.5 + d[1] / numEdges);
 
-    const surrounds = [];
-    for (let i = 0; i < 4; i++) {
-      const u = i & 1;
-      const v = (i >> 1) & 1;
-      surrounds[i] = sdfdata.data[x + u + (y + v) * sdfdata.width];
-    }
-    normals.push(
-      (surrounds[1] - surrounds[0] + surrounds[3] - surrounds[2]) / 2,
-      (surrounds[2] - surrounds[0] + surrounds[3] - surrounds[1]) / 2
-    );
-
-    if (edges & 0b0001) {
-      indices.push(
-        gridIndices[x + y * sdfdata.width],
-        gridIndices[x + (y - 1) * sdfdata.width]
+      const surrounds = [];
+      for (let i = 0; i < 4; i++) {
+        const u = i & 1;
+        const v = (i >> 1) & 1;
+        surrounds[i] = data[x + u + (y + v) * width];
+      }
+      normals.push(
+        (surrounds[1] - surrounds[0] + surrounds[3] - surrounds[2]) / 2,
+        (surrounds[2] - surrounds[0] + surrounds[3] - surrounds[1]) / 2
       );
-    }
-    if (edges & 0b0010) {
-      indices.push(
-        gridIndices[x + y * sdfdata.width],
-        gridIndices[x - 1 + y * sdfdata.width]
-      );
+
+      if (edges & 0b0001) {
+        indices.push(
+          gridIndices[x + y * width],
+          gridIndices[x + (y - 1) * width]
+        );
+      }
+      if (edges & 0b0010) {
+        indices.push(
+          gridIndices[x + y * width],
+          gridIndices[x - 1 + y * width]
+        );
+      }
     }
   }
+
+  return {
+    vertices,
+    normals,
+    indices,
+  };
 }
+
+const { vertices, normals, indices } = getGeometryData(
+  sdfdata.data,
+  sdfdata.width,
+  sdfdata.height
+);
 
 for (let i = 0; i < indices.length / 2; i++) {
   ctx.strokeStyle = "white";
