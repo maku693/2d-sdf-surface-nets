@@ -26,7 +26,7 @@ const edgeBitFields = new Uint8Array(1 << 4);
   }
 }
 
-const sdfdata = new SDFData(32);
+const sdfdata = new SDFData(8);
 const scene = merge(
   circle(sdfdata.width / 2, sdfdata.height / 2, sdfdata.width / 4)
   // circle(sdfdata.width / 4, sdfdata.height / 2, sdfdata.width / 16),
@@ -34,7 +34,7 @@ const scene = merge(
 );
 sdfdata.drawDistanceFunction(scene);
 
-const pixelsPerGrid = 10;
+const pixelsPerGrid = 20;
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 canvas.style.width = `${sdfdata.width * pixelsPerGrid}px`;
@@ -68,7 +68,7 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "white";
       ctx.textBaseline = "middle";
       ctx.textAlign = "center";
-      ctx.font = "4px monospace";
+      ctx.font = `${pixelsPerGrid / 2 - 1}px monospace`;
       ctx.fillText(
         `${d.toFixed(1)}`,
         x * pixelsPerGrid + pixelsPerGrid / 2,
@@ -80,7 +80,11 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 ctx.lineWidth = 2;
 
-const gridToVertex = {};
+const vertices = [];
+const normals = [];
+const indices = [];
+const gridIndices = {};
+
 for (let y = 0; y < sdfdata.height - 1; y++) {
   for (let x = 0; x < sdfdata.width - 1; x++) {
     let cornerMask = 0;
@@ -94,13 +98,13 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
 
     const edges = edgeBitFields[cornerMask];
 
-    let edgeCount = 0;
+    let numEdges = 0;
     let d = [0, 0];
     for (let i = 0; i < 4; i++) {
       if (!(edges & (1 << i))) continue;
-      edgeCount++;
+      numEdges++;
 
-      const indices = [0, 0];
+      const dataIndices = [0, 0];
       const uv = [
         [0, 0],
         [0, 0],
@@ -109,52 +113,75 @@ for (let y = 0; y < sdfdata.height - 1; y++) {
         for (let k = 0; k < 2; k++) {
           uv[j][k] = (edgeCorners[i][j] >> k) & 1;
         }
-        indices[j] = x + uv[j][0] + (y + uv[j][1]) * sdfdata.width;
+        dataIndices[j] = x + uv[j][0] + (y + uv[j][1]) * sdfdata.width;
       }
       const t =
-        (0 - sdfdata.data[indices[0]]) /
-        (sdfdata.data[indices[1]] - sdfdata.data[indices[0]]);
+        (0 - sdfdata.data[dataIndices[0]]) /
+        (sdfdata.data[dataIndices[1]] - sdfdata.data[dataIndices[0]]);
       for (let j = 0; j < 2; j++) {
         d[j] += lerp(uv[0][j], uv[1][j], t);
       }
     }
 
-    if (edgeCount === 0) continue;
+    if (numEdges === 0) continue;
+
+    gridIndices[x + y * sdfdata.width] = vertices.length / 2;
 
     // Shift vertex to center of the grid
-    const vx = x + 0.5 + d[0] / edgeCount;
-    const vy = y + 0.5 + d[1] / edgeCount;
+    vertices.push(x + 0.5 + d[0] / numEdges, y + 0.5 + d[1] / numEdges);
 
-    gridToVertex[x + y * sdfdata.width] = [vx, vy];
-
-    ctx.strokeStyle = "white";
-    if (y !== 0 && edges & 0b0001) {
-      const [vx_, vy_] = gridToVertex[x + (y - 1) * sdfdata.width];
-      ctx.beginPath();
-      ctx.moveTo(vx * pixelsPerGrid, vy * pixelsPerGrid);
-      ctx.lineTo(vx_ * pixelsPerGrid, vy_ * pixelsPerGrid);
-      ctx.stroke();
+    const surrounds = [];
+    for (let i = 0; i < 4; i++) {
+      const u = i & 1;
+      const v = (i >> 1) & 1;
+      surrounds[i] = sdfdata.data[x + u + (y + v) * sdfdata.width];
     }
-    if (x !== 0 && edges & 0b0010) {
-      const [vx_, vy_] = gridToVertex[x - 1 + y * sdfdata.width];
-      ctx.beginPath();
-      ctx.moveTo(vx * pixelsPerGrid, vy * pixelsPerGrid);
-      ctx.lineTo(vx_ * pixelsPerGrid, vy_ * pixelsPerGrid);
-      ctx.stroke();
-    }
+    normals.push(
+      (surrounds[1] - surrounds[0] + surrounds[3] - surrounds[2]) / 2,
+      (surrounds[2] - surrounds[0] + surrounds[3] - surrounds[1]) / 2
+    );
 
-    const d0 = sdfdata.data[x + y * sdfdata.width];
-    const d1 = sdfdata.data[x + 1 + y * sdfdata.width];
-    const d2 = sdfdata.data[x + (y + 1) * sdfdata.width];
-    const d3 = sdfdata.data[x + 1 + (y + 1) * sdfdata.width];
-    const nx = (d1 - d0 + d3 - d2) / 2;
-    const ny = (d2 - d0 + d3 - d1) / 2;
-    ctx.strokeStyle = "cyan";
-    ctx.beginPath();
-    ctx.moveTo(vx * pixelsPerGrid, vy * pixelsPerGrid);
-    ctx.lineTo(vx * pixelsPerGrid + 20 * nx, vy * pixelsPerGrid + 20 * ny);
-    ctx.stroke();
+    if (edges & 0b0001) {
+      indices.push(
+        gridIndices[x + y * sdfdata.width],
+        gridIndices[x + (y - 1) * sdfdata.width]
+      );
+    }
+    if (edges & 0b0010) {
+      indices.push(
+        gridIndices[x + y * sdfdata.width],
+        gridIndices[x - 1 + y * sdfdata.width]
+      );
+    }
   }
+}
+
+for (let i = 0; i < indices.length / 2; i++) {
+  ctx.strokeStyle = "white";
+  ctx.beginPath();
+  ctx.moveTo(
+    vertices[indices[i * 2 + 0] * 2 + 0] * pixelsPerGrid,
+    vertices[indices[i * 2 + 0] * 2 + 1] * pixelsPerGrid
+  );
+  ctx.lineTo(
+    vertices[indices[i * 2 + 1] * 2 + 0] * pixelsPerGrid,
+    vertices[indices[i * 2 + 1] * 2 + 1] * pixelsPerGrid
+  );
+  ctx.stroke();
+}
+
+for (let i = 0; i < vertices.length / 2; i++) {
+  ctx.strokeStyle = "cyan";
+  ctx.beginPath();
+  ctx.moveTo(
+    vertices[i * 2 + 0] * pixelsPerGrid,
+    vertices[i * 2 + 1] * pixelsPerGrid
+  );
+  ctx.lineTo(
+    (vertices[i * 2 + 0] + normals[i * 2 + 0]) * pixelsPerGrid,
+    (vertices[i * 2 + 1] + normals[i * 2 + 1]) * pixelsPerGrid
+  );
+  ctx.stroke();
 }
 
 // y = y1 + (y2 - y1) / (x2 - x1) * (x - x1)
