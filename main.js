@@ -1,7 +1,7 @@
 import { circle, merge, SDFData } from "./sdf.js";
 import { getGeometryData } from "./surface-nets.js";
 
-const sdfdata = new SDFData(8);
+const sdfdata = new SDFData(64);
 const scene = merge(
   circle(sdfdata.width / 2, sdfdata.height / 2, sdfdata.width / 4)
   // circle(sdfdata.width / 4, sdfdata.height / 2, sdfdata.width / 16),
@@ -9,7 +9,7 @@ const scene = merge(
 );
 sdfdata.drawDistanceFunction(scene);
 
-const pixelsPerGrid = 20;
+const pixelsPerGrid = 5;
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 canvas.style.width = `${sdfdata.width * pixelsPerGrid}px`;
@@ -61,7 +61,7 @@ const { vertices, normals, indices } = getGeometryData(
 );
 console.timeEnd("getGeometryData");
 
-ctx.lineWidth = 2;
+ctx.lineWidth = 1;
 
 for (let i = 0; i < indices.length / 2; i++) {
   ctx.strokeStyle = "white";
