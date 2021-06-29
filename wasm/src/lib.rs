@@ -70,7 +70,9 @@ pub fn get_geometry_data(data: &[f32], width: u16, height: u16) -> GeometryData 
           }
           indices[j] = (x + uv[j][0] + (y + uv[j][1]) * width).into();
         }
-        let t = (0. - data[indices[0]]) / (data[indices[1]] - data[indices[0]]);
+        let d0 = data.get(indices[0]).cloned().unwrap_or_default();
+        let d1 = data.get(indices[1]).cloned().unwrap_or_default();
+        let t = (0. - d0) / (d1 - d0);
         for j in 0..2 {
           delta[j] += lerp(uv[0][j].into(), uv[1][j].into(), t);
         }
