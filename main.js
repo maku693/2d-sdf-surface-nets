@@ -1,5 +1,10 @@
 import { circle, merge, SDFData } from "./sdf.js";
 import { getGeometryData } from "./surface-nets.js";
+import init, {
+  getGeometryData as getGeometryDataWASM,
+} from "./wasm/pkg/wasm.js";
+
+await init();
 
 const sdfdata = new SDFData(64);
 const scene = merge(
@@ -8,6 +13,26 @@ const scene = merge(
   // circle((sdfdata.width / 4) * 3, sdfdata.height / 2, sdfdata.width / 16)
 );
 sdfdata.drawDistanceFunction(scene);
+
+let geometryData;
+
+const url = new URL(location.href);
+if (url.searchParams.get("wasm") === "✔") {
+  document.getElementById("form_wasm").checked = true;
+  console.time("getGeometryDataWASM");
+  geometryData = getGeometryDataWASM(
+    sdfdata.data,
+    sdfdata.width,
+    sdfdata.height
+  );
+  console.timeEnd("getGeometryDataWASM");
+} else {
+  console.time("getGeometryData");
+  geometryData = getGeometryData(sdfdata.data, sdfdata.width, sdfdata.height);
+  console.timeEnd("getGeometryData");
+}
+
+const { vertices, normals, indices } = geometryData;
 
 const pixelsPerGrid = 5;
 const canvas = document.getElementById("canvas");
@@ -49,14 +74,6 @@ for (let y = 0; y < sdfdata.height; y++) {
     );
   }
 }
-
-console.time("getGeometryData");
-const { vertices, normals, indices } = getGeometryData(
-  sdfdata.data,
-  sdfdata.width,
-  sdfdata.height
-);
-console.timeEnd("getGeometryData");
 
 ctx.lineWidth = 1;
 
