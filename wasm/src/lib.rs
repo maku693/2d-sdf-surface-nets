@@ -1,6 +1,6 @@
 use js_sys::{Float32Array, Uint16Array};
 use nohash_hasher::IntMap;
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryFrom;
 use wasm_bindgen::prelude::*;
 
 #[cfg(feature = "wee_alloc")]
@@ -80,12 +80,7 @@ pub fn get_geometry_data(data: &[f32], width: u16, height: u16) -> GeometryData 
         continue;
       }
 
-      let grid_index: u16 = vertices
-        .len()
-        .checked_div(2)
-        .unwrap_or_default()
-        .try_into()
-        .unwrap_or_default();
+      let grid_index = u16::try_from(vertices.len() / 2).unwrap_or_default();
       grid_indices.insert(x + y * width, grid_index);
 
       {
