@@ -17,22 +17,23 @@ sdfdata.drawDistanceFunction(scene);
 let geometryData;
 
 const url = new URL(location.href);
-if (url.searchParams.get("wasm") === "✔") {
-  document.getElementById("form_wasm").checked = true;
-  const begin = performance.now();
-  geometryData = getGeometryDataWASM(
-    sdfdata.data,
-    sdfdata.width,
-    sdfdata.height
-  );
-  const time = performance.now() - begin;
-  document.getElementById("time").textContent = `${time} ms`;
-} else {
-  const begin = performance.now();
-  geometryData = getGeometryData(sdfdata.data, sdfdata.width, sdfdata.height);
-  const time = performance.now() - begin;
-  document.getElementById("time").textContent = `${time} ms`;
+const isWASM = url.searchParams.get("wasm") === "✔";
+document.getElementById("form_wasm").checked = isWASM;
+const samples = 10;
+const begin = performance.now();
+for (let i = 0; i < samples; i++) {
+  if (isWASM) {
+    geometryData = getGeometryDataWASM(
+      sdfdata.data,
+      sdfdata.width,
+      sdfdata.height
+    );
+  } else {
+    geometryData = getGeometryData(sdfdata.data, sdfdata.width, sdfdata.height);
+  }
 }
+const time = (performance.now() - begin) / samples;
+document.getElementById("time").textContent = `${time} ms`;
 
 const { vertices, normals, indices } = geometryData;
 
