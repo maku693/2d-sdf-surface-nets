@@ -19,17 +19,19 @@ let geometryData;
 const url = new URL(location.href);
 if (url.searchParams.get("wasm") === "✔") {
   document.getElementById("form_wasm").checked = true;
-  console.time("getGeometryDataWASM");
+  const begin = performance.now();
   geometryData = getGeometryDataWASM(
     sdfdata.data,
     sdfdata.width,
     sdfdata.height
   );
-  console.timeEnd("getGeometryDataWASM");
+  const time = performance.now() - begin;
+  document.getElementById("time").textContent = `${time} ms`;
 } else {
-  console.time("getGeometryData");
+  const begin = performance.now();
   geometryData = getGeometryData(sdfdata.data, sdfdata.width, sdfdata.height);
-  console.timeEnd("getGeometryData");
+  const time = performance.now() - begin;
+  document.getElementById("time").textContent = `${time} ms`;
 }
 
 const { vertices, normals, indices } = geometryData;
