@@ -46,7 +46,7 @@ export function getGeometryData(data, width, height) {
       let numEdges = 0;
       let d = [0, 0];
       for (let i = 0; i < 4; i++) {
-        if (!(edges & (1 << i))) continue;
+        if ((edges & (1 << i)) == 0) continue;
         numEdges++;
 
         const dataIndices = [0, 0];
