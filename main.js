@@ -39,10 +39,10 @@ import init, {
 
   const { vertices, normals, indices } = geometryData;
 
-  const pixelsPerGrid = 5;
+  const pixelsPerGrid = 4;
   const canvas = document.getElementById("canvas");
-  canvas.style.width = `${width * pixelsPerGrid}px`;
-  canvas.style.height = `${height * pixelsPerGrid}px`;
+  canvas.style.width = `${width * pixelsPerGrid * 0.5}px`;
+  canvas.style.height = `${height * pixelsPerGrid * 0.5}px`;
   canvas.width = width * pixelsPerGrid * window.devicePixelRatio;
   canvas.height = height * pixelsPerGrid * window.devicePixelRatio;
   const ctx = canvas.getContext("2d");
@@ -68,15 +68,15 @@ import init, {
       );
       ctx.fill();
       ctx.stroke();
-      ctx.fillStyle = "white";
-      ctx.textBaseline = "middle";
-      ctx.textAlign = "center";
-      ctx.font = `${pixelsPerGrid / 2 - 1}px monospace`;
-      ctx.fillText(
-        `${d.toFixed(1)}`,
-        x * pixelsPerGrid + pixelsPerGrid / 2,
-        y * pixelsPerGrid + pixelsPerGrid / 2
-      );
+      // ctx.fillStyle = "white";
+      // ctx.textBaseline = "middle";
+      // ctx.textAlign = "center";
+      // ctx.font = `${pixelsPerGrid / 2 - 1}px monospace`;
+      // ctx.fillText(
+      //   `${d.toFixed(1)}`,
+      //   x * pixelsPerGrid + pixelsPerGrid / 2,
+      //   y * pixelsPerGrid + pixelsPerGrid / 2
+      // );
     }
   }
 
