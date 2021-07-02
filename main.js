@@ -1,4 +1,4 @@
-import { circle, merge, SDFData } from "./sdf.js";
+import { circle, draw, merge } from "./sdf.js";
 import { getGeometryData as getGeometryDataJS } from "./surface-nets.js";
 import init, {
   getGeometryData as getGeometryDataWASM,
@@ -7,13 +7,16 @@ import init, {
 (async function main() {
   await init();
 
-  const sdfdata = new SDFData(256);
+  const width = 256;
+  const height = width;
+  const data = new Float32Array(width * height).fill(Infinity);
+
   const scene = merge(
-    circle(sdfdata.width / 2, sdfdata.height / 2, sdfdata.width / 4)
+    circle(width / 2, height / 2, width / 4)
     // circle(sdfdata.width / 4, sdfdata.height / 2, sdfdata.width / 16),
     // circle((sdfdata.width / 4) * 3, sdfdata.height / 2, sdfdata.width / 16)
   );
-  sdfdata.drawDistanceFunction(scene);
+  draw(width, height, data, scene);
 
   let getGeometryData;
 
@@ -29,7 +32,7 @@ import init, {
   const begin = performance.now();
   let geometryData;
   for (let i = 0; i < samples; i++) {
-    geometryData = getGeometryData(sdfdata.data, sdfdata.width, sdfdata.height);
+    geometryData = getGeometryData(data, width, height);
   }
   const time = (performance.now() - begin) / samples;
   document.getElementById("time").textContent = `${time} ms`;
@@ -38,20 +41,20 @@ import init, {
 
   const pixelsPerGrid = 5;
   const canvas = document.getElementById("canvas");
-  canvas.style.width = `${sdfdata.width * pixelsPerGrid}px`;
-  canvas.style.height = `${sdfdata.height * pixelsPerGrid}px`;
-  canvas.width = sdfdata.width * pixelsPerGrid * window.devicePixelRatio;
-  canvas.height = sdfdata.height * pixelsPerGrid * window.devicePixelRatio;
+  canvas.style.width = `${width * pixelsPerGrid}px`;
+  canvas.style.height = `${height * pixelsPerGrid}px`;
+  canvas.width = width * pixelsPerGrid * window.devicePixelRatio;
+  canvas.height = height * pixelsPerGrid * window.devicePixelRatio;
   const ctx = canvas.getContext("2d");
   ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  for (let y = 0; y < sdfdata.height; y++) {
-    for (let x = 0; x < sdfdata.width; x++) {
-      const i = x + sdfdata.width * y;
-      const d = sdfdata.data[i];
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = x + width * y;
+      const d = data[i];
       const r = d > 0 ? 0xff * d : 0;
       const g = d < 0 ? 0xff * -d : 0;
       ctx.fillStyle = `rgba(${r}, ${g}, 0, 1)`;
