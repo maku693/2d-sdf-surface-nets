@@ -7,7 +7,7 @@ import init, {
 (async function main() {
   await init();
 
-  const sdfdata = new SDFData(64);
+  const sdfdata = new SDFData(256);
   const scene = merge(
     circle(sdfdata.width / 2, sdfdata.height / 2, sdfdata.width / 4)
     // circle(sdfdata.width / 4, sdfdata.height / 2, sdfdata.width / 16),
