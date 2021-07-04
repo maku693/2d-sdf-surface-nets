@@ -10,12 +10,16 @@ export function circle(cx, cy, r) {
   };
 }
 
-export function draw(width, height, data, scene) {
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const i = x + width * y;
+export function draw(data, scene, level) {
+  let edgeLength = 2 ** level;
+  const cellEdgeLength = 1 / edgeLength;
+  for (let v = 0; v < edgeLength; v++) {
+    for (let u = 0; u < edgeLength; u++) {
+      const x = (u + 0.5) * cellEdgeLength;
+      const y = (v + 0.5) * cellEdgeLength;
+      const i = u + edgeLength * v;
       // Shift the sampling point to center of the grid
-      data[i] = Math.min(data[i], scene(x + 0.5, y + 0.5));
+      data[i] = Math.min(data[i], scene(x, y));
     }
   }
 }
