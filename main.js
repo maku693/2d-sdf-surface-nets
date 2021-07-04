@@ -26,9 +26,7 @@ import init, {
   }
 
   let getGeometryData;
-
-  const url = new URL(location.href);
-  const isWASM = url.searchParams.get("wasm") === "✔";
+  const isWASM = new URL(location.href).searchParams.get("wasm") === "✔";
   if (isWASM) {
     getGeometryData = getGeometryDataWASM;
   } else {
