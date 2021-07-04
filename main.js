@@ -8,12 +8,13 @@ import init, {
   await init();
 
   const level = 4;
-  const numCells = 2 ** level;
+  const numSamples = 2 ** level;
+  const cellSize = 1 / numSamples;
 
-  const data = new Float32Array(numCells ** 2).fill(Infinity);
+  const data = new Float32Array(numSamples ** 2).fill(Infinity);
   const scene = merge(circle(0.5, 0.5, 0.25));
 
-  draw(data, scene, level);
+  draw(scene, data, numSamples, cellSize);
 
   let getGeometryData;
 
@@ -29,7 +30,7 @@ import init, {
   const begin = performance.now();
   let geometryData;
   for (let i = 0; i < samples; i++) {
-    geometryData = getGeometryData(data, numCells, numCells);
+    geometryData = getGeometryData(data, numSamples, numSamples);
   }
   const time = (performance.now() - begin) / samples;
   document.getElementById("time").textContent = `${time} ms`;
@@ -39,19 +40,19 @@ import init, {
   const pixelsPerCell = 40;
   const canvas = document.getElementById("canvas");
   canvas.style.width = canvas.style.height = `${
-    numCells * pixelsPerCell * 0.5
+    numSamples * pixelsPerCell * 0.5
   }px`;
   canvas.width = canvas.height =
-    numCells * pixelsPerCell * window.devicePixelRatio;
+    numSamples * pixelsPerCell * window.devicePixelRatio;
   const ctx = canvas.getContext("2d");
   ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  for (let y = 0; y < numCells; y++) {
-    for (let x = 0; x < numCells; x++) {
-      const i = x + numCells * y;
+  for (let y = 0; y < numSamples; y++) {
+    for (let x = 0; x < numSamples; x++) {
+      const i = x + numSamples * y;
       const d = data[i];
       const r = d > 0 ? 0xff * d : 0;
       const g = d < 0 ? 0xff * -d : 0;
@@ -66,7 +67,7 @@ import init, {
       );
       ctx.fill();
       ctx.stroke();
-      if (Math.abs(d) < 0.1) {
+      if (Math.abs(d) < cellSize) {
         ctx.fillStyle = "yellow";
       } else {
         ctx.fillStyle = "white";
@@ -75,7 +76,7 @@ import init, {
       ctx.textAlign = "center";
       ctx.font = `${pixelsPerCell * 0.25}px monospace`;
       ctx.fillText(
-        `${d.toFixed(1)}`,
+        `${d.toFixed(3)}`,
         x * pixelsPerCell + pixelsPerCell / 2,
         y * pixelsPerCell + pixelsPerCell / 2
       );
