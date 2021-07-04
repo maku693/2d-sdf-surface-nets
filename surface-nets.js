@@ -81,10 +81,11 @@ export function getGeometryData(data, width, height) {
         const v = (i >> 1) & 1;
         surrounds[i] = data[x + u + (y + v) * width];
       }
-      normals.push(
-        (surrounds[1] - surrounds[0] + surrounds[3] - surrounds[2]) / 2,
-        (surrounds[2] - surrounds[0] + surrounds[3] - surrounds[1]) / 2
-      );
+
+      const a = surrounds[1] - surrounds[0] + surrounds[3] - surrounds[2];
+      const b = surrounds[2] - surrounds[0] + surrounds[3] - surrounds[1];
+      const magnitude = Math.sqrt(a * a + b * b);
+      normals.push(a / magnitude, b / magnitude);
 
       if (edges & 0b0001) {
         indices.push(
