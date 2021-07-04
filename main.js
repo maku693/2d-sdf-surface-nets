@@ -7,14 +7,23 @@ import init, {
 (async function main() {
   await init();
 
-  const level = 4;
-  const numSamples = 2 ** level;
+  const levels = 5;
+  const numSamples = 2 ** levels;
   const cellSize = 1 / numSamples;
+  const arraySize = (numSamples ** 2 * (1 + 1 / 3)) | 0;
 
-  const data = new Float32Array(numSamples ** 2).fill(Infinity);
+  const data = new Float32Array(arraySize).fill(Infinity);
   const scene = merge(circle(0.5, 0.5, 0.25));
 
-  draw(scene, data, numSamples, cellSize);
+  {
+    const samples = 10;
+    const begin = performance.now();
+    for (let i = 0; i < samples; i++) {
+      draw(scene, data, levels);
+    }
+    const time = (performance.now() - begin) / samples;
+    document.getElementById("time_draw").textContent = `${time} ms`;
+  }
 
   let getGeometryData;
 
@@ -26,15 +35,17 @@ import init, {
     getGeometryData = getGeometryDataJS;
   }
   document.getElementById("form_wasm").checked = isWASM;
-  const samples = 10;
-  const begin = performance.now();
-  let geometryData;
-  for (let i = 0; i < samples; i++) {
-    geometryData = getGeometryData(data, numSamples, numSamples);
-  }
-  const time = (performance.now() - begin) / samples;
-  document.getElementById("time").textContent = `${time} ms`;
 
+  let geometryData;
+  {
+    const samples = 10;
+    const begin = performance.now();
+    for (let i = 0; i < samples; i++) {
+      geometryData = getGeometryData(data, numSamples, numSamples);
+    }
+    const time = (performance.now() - begin) / samples;
+    document.getElementById("time_getGeometryData").textContent = `${time} ms`;
+  }
   const { vertices, normals, indices } = geometryData;
 
   const pixelsPerCell = 40;
