@@ -66,7 +66,11 @@ import init, {
       );
       ctx.fill();
       ctx.stroke();
-      ctx.fillStyle = "white";
+      if (Math.abs(d) < 0.1) {
+        ctx.fillStyle = "yellow";
+      } else {
+        ctx.fillStyle = "white";
+      }
       ctx.textBaseline = "middle";
       ctx.textAlign = "center";
       ctx.font = `${pixelsPerCell * 0.25}px monospace`;
