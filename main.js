@@ -7,19 +7,21 @@ import init, {
 (async function main() {
   await init();
 
-  const levels = 5;
-  const numSamples = 2 ** levels;
-  const cellSize = 1 / numSamples;
-  const arraySize = (numSamples ** 2 * (1 + 1 / 3)) | 0;
+  const width = 256;
+  const height = width;
+  const data = new Float32Array(width * height).fill(Infinity);
 
-  const data = new Float32Array(arraySize).fill(Infinity);
-  const scene = merge(circle(0.5, 0.5, 0.25));
+  const scene = merge(
+    circle(width / 2, height / 2, width / 4)
+    // circle(sdfdata.width / 4, sdfdata.height / 2, sdfdata.width / 16),
+    // circle((sdfdata.width / 4) * 3, sdfdata.height / 2, sdfdata.width / 16)
+  );
 
   {
     const samples = 10;
     const begin = performance.now();
     for (let i = 0; i < samples; i++) {
-      draw(scene, data, levels);
+      draw(width, height, data, scene);
     }
     const time = (performance.now() - begin) / samples;
     document.getElementById("time_draw").textContent = `${time} ms`;
@@ -39,29 +41,28 @@ import init, {
     const samples = 10;
     const begin = performance.now();
     for (let i = 0; i < samples; i++) {
-      geometryData = getGeometryData(data, numSamples, numSamples);
+      geometryData = getGeometryData(data, width, height);
     }
     const time = (performance.now() - begin) / samples;
     document.getElementById("time_getGeometryData").textContent = `${time} ms`;
   }
   const { vertices, normals, indices } = geometryData;
 
-  const pixelsPerCell = 40;
+  const pixelsPerGrid = 4;
   const canvas = document.getElementById("canvas");
-  canvas.style.width = canvas.style.height = `${
-    numSamples * pixelsPerCell * 0.5
-  }px`;
-  canvas.width = canvas.height =
-    numSamples * pixelsPerCell * window.devicePixelRatio;
+  canvas.style.width = `${width * pixelsPerGrid * 0.5}px`;
+  canvas.style.height = `${height * pixelsPerGrid * 0.5}px`;
+  canvas.width = width * pixelsPerGrid * window.devicePixelRatio;
+  canvas.height = height * pixelsPerGrid * window.devicePixelRatio;
   const ctx = canvas.getContext("2d");
   ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  for (let y = 0; y < numSamples; y++) {
-    for (let x = 0; x < numSamples; x++) {
-      const i = x + numSamples * y;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = x + width * y;
       const d = data[i];
       const r = d > 0 ? 0xff * d : 0;
       const g = d < 0 ? 0xff * -d : 0;
@@ -69,25 +70,21 @@ import init, {
       ctx.strokeStyle = "black";
       ctx.beginPath();
       ctx.rect(
-        x * pixelsPerCell,
-        y * pixelsPerCell,
-        pixelsPerCell,
-        pixelsPerCell
+        x * pixelsPerGrid,
+        y * pixelsPerGrid,
+        pixelsPerGrid,
+        pixelsPerGrid
       );
       ctx.fill();
       ctx.stroke();
-      if (Math.abs(d) < cellSize) {
-        ctx.fillStyle = "yellow";
-      } else {
-        ctx.fillStyle = "white";
-      }
+      ctx.fillStyle = "white";
       ctx.textBaseline = "middle";
       ctx.textAlign = "center";
-      ctx.font = `${pixelsPerCell * 0.25}px monospace`;
+      ctx.font = `${pixelsPerGrid * 0.25}px monospace`;
       ctx.fillText(
         `${d.toFixed(3)}`,
-        x * pixelsPerCell + pixelsPerCell / 2,
-        y * pixelsPerCell + pixelsPerCell / 2
+        x * pixelsPerGrid + pixelsPerGrid / 2,
+        y * pixelsPerGrid + pixelsPerGrid / 2
       );
     }
   }
@@ -98,12 +95,12 @@ import init, {
     ctx.strokeStyle = "white";
     ctx.beginPath();
     ctx.moveTo(
-      vertices[indices[i * 2 + 0] * 2 + 0] * pixelsPerCell,
-      vertices[indices[i * 2 + 0] * 2 + 1] * pixelsPerCell
+      vertices[indices[i * 2 + 0] * 2 + 0] * pixelsPerGrid,
+      vertices[indices[i * 2 + 0] * 2 + 1] * pixelsPerGrid
     );
     ctx.lineTo(
-      vertices[indices[i * 2 + 1] * 2 + 0] * pixelsPerCell,
-      vertices[indices[i * 2 + 1] * 2 + 1] * pixelsPerCell
+      vertices[indices[i * 2 + 1] * 2 + 0] * pixelsPerGrid,
+      vertices[indices[i * 2 + 1] * 2 + 1] * pixelsPerGrid
     );
     ctx.stroke();
   }
@@ -112,12 +109,12 @@ import init, {
     ctx.strokeStyle = "cyan";
     ctx.beginPath();
     ctx.moveTo(
-      vertices[i * 2 + 0] * pixelsPerCell,
-      vertices[i * 2 + 1] * pixelsPerCell
+      vertices[i * 2 + 0] * pixelsPerGrid,
+      vertices[i * 2 + 1] * pixelsPerGrid
     );
     ctx.lineTo(
-      (vertices[i * 2 + 0] + normals[i * 2 + 0]) * pixelsPerCell,
-      (vertices[i * 2 + 1] + normals[i * 2 + 1]) * pixelsPerCell
+      (vertices[i * 2 + 0] + normals[i * 2 + 0]) * pixelsPerGrid,
+      (vertices[i * 2 + 1] + normals[i * 2 + 1]) * pixelsPerGrid
     );
     ctx.stroke();
   }
