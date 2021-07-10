@@ -1,6 +1,13 @@
 export function merge(...ff) {
   return function (x, y) {
-    return Math.min(...ff.map((f) => f(x, y)));
+    let res = Infinity;
+    for (const f of ff) {
+      const tmp = f(x, y);
+      if (tmp < res) {
+        res = tmp;
+      }
+    }
+    return res;
   };
 }
 
