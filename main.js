@@ -17,8 +17,8 @@ import init, {
     // circle((sdfdata.width / 4) * 3, sdfdata.height / 2, sdfdata.width / 16)
   );
 
+  const samples = 10;
   {
-    const samples = 10;
     const begin = performance.now();
     for (let i = 0; i < samples; i++) {
       draw(width, height, data, scene);
@@ -38,7 +38,6 @@ import init, {
 
   let geometryData;
   {
-    const samples = 10;
     const begin = performance.now();
     for (let i = 0; i < samples; i++) {
       geometryData = getGeometryData(data, width, height);
