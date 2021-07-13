@@ -13,8 +13,8 @@ import init, {
 
   const scene = merge(
     circle(width / 2, height / 2, width / 4)
-    // circle(sdfdata.width / 4, sdfdata.height / 2, sdfdata.width / 16),
-    // circle((sdfdata.width / 4) * 3, sdfdata.height / 2, sdfdata.width / 16)
+    // circle(width / 4, height / 2, width / 16),
+    // circle((width / 4) * 3, height / 2, width / 16)
   );
 
   const samples = 10;
