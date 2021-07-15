@@ -1,4 +1,4 @@
-import { circle, draw as drawSDF, merge } from "./sdf.js";
+import * as sdf from "./sdf.js";
 import { getGeometryData as getGeometryDataJS } from "./surface-nets.js";
 import init, {
   getGeometryData as getGeometryDataWASM,
@@ -11,17 +11,17 @@ import init, {
   const height = width;
   const data = new Float32Array(width * height).fill(Infinity);
 
-  const scene = merge(
-    circle(width / 2, height / 2, width / 4)
-    // circle(width / 4, height / 2, width / 16),
-    // circle((width / 4) * 3, height / 2, width / 16)
+  const scene = sdf.merge(
+    sdf.circle(width / 2, height / 2, width / 4)
+    // sdf.circle(width / 4, height / 2, width / 16),
+    // sdf.circle((width / 4) * 3, height / 2, width / 16)
   );
 
   const samples = 10;
   {
     const begin = performance.now();
     for (let i = 0; i < samples; i++) {
-      drawSDF(width, height, data, scene);
+      sdf.draw(width, height, data, scene);
     }
     const time = (performance.now() - begin) / samples;
     document.getElementById("time_draw").textContent = `${time} ms`;
