@@ -68,6 +68,7 @@ import init, {
         const g = d < 0 ? 0xff * -d : 0;
         ctx.fillStyle = `rgba(${r}, ${g}, 0, 1)`;
         ctx.strokeStyle = "black";
+        ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.rect(
           x * pixelsPerGrid,
@@ -89,7 +90,7 @@ import init, {
       }
     }
 
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 2;
 
     for (let i = 0; i < indices.length / 2; i++) {
       ctx.strokeStyle = "white";
@@ -120,7 +121,7 @@ import init, {
     }
 
     if (mouseEvent) {
-      ctx.strokeStyle = "red";
+      ctx.strokeStyle = "yellow";
       ctx.beginPath();
       ctx.moveTo(mouseEvent.offsetX, mouseEvent.offsetY);
       ctx.lineTo(width * 0.5 * pixelsPerGrid, height * 0.5 * pixelsPerGrid);
