@@ -1,4 +1,4 @@
-import { circle, draw, merge } from "./sdf.js";
+import { circle, draw as drawSDF, merge } from "./sdf.js";
 import { getGeometryData as getGeometryDataJS } from "./surface-nets.js";
 import init, {
   getGeometryData as getGeometryDataWASM,
@@ -7,7 +7,7 @@ import init, {
 (async function main() {
   await init();
 
-  const width = 256;
+  const width = 16;
   const height = width;
   const data = new Float32Array(width * height).fill(Infinity);
 
@@ -21,7 +21,7 @@ import init, {
   {
     const begin = performance.now();
     for (let i = 0; i < samples; i++) {
-      draw(width, height, data, scene);
+      drawSDF(width, height, data, scene);
     }
     const time = (performance.now() - begin) / samples;
     document.getElementById("time_draw").textContent = `${time} ms`;
@@ -47,74 +47,89 @@ import init, {
   }
   const { vertices, normals, indices } = geometryData;
 
-  const pixelsPerGrid = 4;
+  const pixelsPerGrid = 20;
   const canvas = document.getElementById("canvas");
-  canvas.style.width = `${width * pixelsPerGrid * 0.5}px`;
-  canvas.style.height = `${height * pixelsPerGrid * 0.5}px`;
-  canvas.width = width * pixelsPerGrid * window.devicePixelRatio;
-  canvas.height = height * pixelsPerGrid * window.devicePixelRatio;
+  canvas.style.width = `${width * pixelsPerGrid}px`;
+  canvas.style.height = `${height * pixelsPerGrid}px`;
+  canvas.width = width * pixelsPerGrid;
+  canvas.height = height * pixelsPerGrid;
   const ctx = canvas.getContext("2d");
-  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-  ctx.fillStyle = "black";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  let mouseEvent;
+  function draw() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const i = x + width * y;
-      const d = data[i];
-      const r = d > 0 ? 0xff * d : 0;
-      const g = d < 0 ? 0xff * -d : 0;
-      ctx.fillStyle = `rgba(${r}, ${g}, 0, 1)`;
-      ctx.strokeStyle = "black";
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = x + width * y;
+        const d = data[i];
+        const r = d > 0 ? 0xff * d : 0;
+        const g = d < 0 ? 0xff * -d : 0;
+        ctx.fillStyle = `rgba(${r}, ${g}, 0, 1)`;
+        ctx.strokeStyle = "black";
+        ctx.beginPath();
+        ctx.rect(
+          x * pixelsPerGrid,
+          y * pixelsPerGrid,
+          pixelsPerGrid,
+          pixelsPerGrid
+        );
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = "white";
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "center";
+        ctx.font = `${pixelsPerGrid * 0.4}px monospace`;
+        ctx.fillText(
+          `${d.toFixed(1)}`,
+          x * pixelsPerGrid + pixelsPerGrid / 2,
+          y * pixelsPerGrid + pixelsPerGrid / 2
+        );
+      }
+    }
+
+    ctx.lineWidth = 1;
+
+    for (let i = 0; i < indices.length / 2; i++) {
+      ctx.strokeStyle = "white";
       ctx.beginPath();
-      ctx.rect(
-        x * pixelsPerGrid,
-        y * pixelsPerGrid,
-        pixelsPerGrid,
-        pixelsPerGrid
+      ctx.moveTo(
+        vertices[indices[i * 2 + 0] * 2 + 0] * pixelsPerGrid,
+        vertices[indices[i * 2 + 0] * 2 + 1] * pixelsPerGrid
       );
-      ctx.fill();
+      ctx.lineTo(
+        vertices[indices[i * 2 + 1] * 2 + 0] * pixelsPerGrid,
+        vertices[indices[i * 2 + 1] * 2 + 1] * pixelsPerGrid
+      );
       ctx.stroke();
-      ctx.fillStyle = "white";
-      ctx.textBaseline = "middle";
-      ctx.textAlign = "center";
-      ctx.font = `${pixelsPerGrid * 0.25}px monospace`;
-      ctx.fillText(
-        `${d.toFixed(3)}`,
-        x * pixelsPerGrid + pixelsPerGrid / 2,
-        y * pixelsPerGrid + pixelsPerGrid / 2
+    }
+
+    for (let i = 0; i < vertices.length / 2; i++) {
+      ctx.strokeStyle = "cyan";
+      ctx.beginPath();
+      ctx.moveTo(
+        vertices[i * 2 + 0] * pixelsPerGrid,
+        vertices[i * 2 + 1] * pixelsPerGrid
       );
+      ctx.lineTo(
+        (vertices[i * 2 + 0] + normals[i * 2 + 0]) * pixelsPerGrid,
+        (vertices[i * 2 + 1] + normals[i * 2 + 1]) * pixelsPerGrid
+      );
+      ctx.stroke();
+    }
+
+    if (mouseEvent) {
+      ctx.strokeStyle = "red";
+      ctx.beginPath();
+      ctx.moveTo(mouseEvent.offsetX, mouseEvent.offsetY);
+      ctx.lineTo(width * 0.5 * pixelsPerGrid, height * 0.5 * pixelsPerGrid);
+      ctx.stroke();
     }
   }
 
-  ctx.lineWidth = 1;
-
-  for (let i = 0; i < indices.length / 2; i++) {
-    ctx.strokeStyle = "white";
-    ctx.beginPath();
-    ctx.moveTo(
-      vertices[indices[i * 2 + 0] * 2 + 0] * pixelsPerGrid,
-      vertices[indices[i * 2 + 0] * 2 + 1] * pixelsPerGrid
-    );
-    ctx.lineTo(
-      vertices[indices[i * 2 + 1] * 2 + 0] * pixelsPerGrid,
-      vertices[indices[i * 2 + 1] * 2 + 1] * pixelsPerGrid
-    );
-    ctx.stroke();
-  }
-
-  for (let i = 0; i < vertices.length / 2; i++) {
-    ctx.strokeStyle = "cyan";
-    ctx.beginPath();
-    ctx.moveTo(
-      vertices[i * 2 + 0] * pixelsPerGrid,
-      vertices[i * 2 + 1] * pixelsPerGrid
-    );
-    ctx.lineTo(
-      (vertices[i * 2 + 0] + normals[i * 2 + 0]) * pixelsPerGrid,
-      (vertices[i * 2 + 1] + normals[i * 2 + 1]) * pixelsPerGrid
-    );
-    ctx.stroke();
-  }
+  canvas.addEventListener("mousemove", (e) => {
+    mouseEvent = e;
+    draw();
+  });
 })();
