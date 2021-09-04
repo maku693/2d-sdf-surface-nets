@@ -12,6 +12,7 @@ import init, {
   const data = new Float32Array(width * height).fill(Infinity);
 
   const scene = sdf.merge(
+    sdf.superEllipse(width / 2, height / 2, width / 4, width / 4, width),
     sdf.circle(width / 2, height / 2, width / 4)
     // sdf.circle(width / 4, height / 2, width / 16),
     // sdf.circle((width / 4) * 3, height / 2, width / 16)

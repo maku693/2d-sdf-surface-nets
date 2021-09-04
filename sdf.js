@@ -17,6 +17,16 @@ export function circle(cx, cy, r) {
   };
 }
 
+export function superEllipse(cx, cy, a, b, n) {
+  return function (x, y) {
+    return (
+      Math.abs(Math.pow((x - cx) / a, n)) +
+      Math.abs(Math.pow((y - cy) / b, n)) -
+      1
+    );
+  };
+}
+
 export function draw(width, height, data, scene) {
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
