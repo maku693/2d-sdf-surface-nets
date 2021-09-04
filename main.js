@@ -77,15 +77,15 @@ import init, {
       );
       ctx.fill();
       ctx.stroke();
-      ctx.fillStyle = "white";
-      ctx.textBaseline = "middle";
-      ctx.textAlign = "center";
-      ctx.font = `${pixelsPerGrid * 0.4}px monospace`;
-      ctx.fillText(
-        `${d.toFixed(1)}`,
-        x * pixelsPerGrid + pixelsPerGrid / 2,
-        y * pixelsPerGrid + pixelsPerGrid / 2
-      );
+      // ctx.fillStyle = "white";
+      // ctx.textBaseline = "middle";
+      // ctx.textAlign = "center";
+      // ctx.font = `${pixelsPerGrid * 0.4}px monospace`;
+      // ctx.fillText(
+      //   `${d.toFixed(1)}`,
+      //   x * pixelsPerGrid + pixelsPerGrid / 2,
+      //   y * pixelsPerGrid + pixelsPerGrid / 2
+      // );
     }
   }
 
