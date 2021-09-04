@@ -13,7 +13,7 @@ export function merge(...ff) {
 
 export function circle(cx, cy, r) {
   return function (x, y) {
-    return Math.sqrt(Math.pow(x - cx, 2) + Math.pow(y - cy, 2)) - r;
+    return Math.pow(x - cx, 2) + Math.pow(y - cy, 2) - Math.pow(r, 2);
   };
 }
 
