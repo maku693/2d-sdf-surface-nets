@@ -20,9 +20,7 @@ export function circle(cx, cy, r) {
 export function superEllipse(cx, cy, a, b, n) {
   return function (x, y) {
     return (
-      Math.abs(Math.pow((x - cx) / a, n)) +
-      Math.abs(Math.pow((y - cy) / b, n)) -
-      1
+      Math.pow(Math.abs(x - cx) / a, n) + Math.pow(Math.abs(y - cy) / b, n) - 1
     );
   };
 }
